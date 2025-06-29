@@ -12,7 +12,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:setup": "bash scripts/setup-db.sh",
-    "test:price-api": "node scripts/test-price-api.js"
+    "test:price-api": "node scripts/test-price-api.js",
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
