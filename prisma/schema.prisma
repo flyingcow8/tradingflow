@@ -13,15 +13,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -38,18 +37,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String        @unique
+  emailVerified DateTime?     @map("email_verified")
   image         String?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  accounts     Account[]
-  sessions     Session[]
-  transactions Transaction[]
-  positions    Position[]
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  accounts      Account[]
+  positions     Position[]
+  sessions      Session[]
+  transactions  Transaction[]
 
   @@map("users")
 }
@@ -64,22 +62,21 @@ model VerificationToken {
 }
 
 model Transaction {
-  id              String   @id @default(cuid())
-  userId          String   @map("user_id")
+  id              String          @id @default(cuid())
+  userId          String          @map("user_id")
   market          Market
-  stockCode       String   @map("stock_code")
-  stockName       String   @map("stock_name")
+  stockCode       String          @map("stock_code")
+  stockName       String          @map("stock_name")
   transactionType TransactionType @map("transaction_type")
   quantity        Int
-  price           Decimal  @db.Decimal(12, 4)
+  price           Decimal         @db.Decimal(12, 4)
   currency        Currency
-  transactionDate DateTime @map("transaction_date")
-  commission      Decimal? @db.Decimal(12, 4)
+  transactionDate DateTime        @map("transaction_date")
+  commission      Decimal?        @db.Decimal(12, 4)
   notes           String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([stockCode])
@@ -94,13 +91,12 @@ model Position {
   stockCode   String   @map("stock_code")
   stockName   String   @map("stock_name")
   quantity    Int
-  averageCost Decimal  @db.Decimal(12, 4) @map("average_cost")
+  averageCost Decimal  @map("average_cost") @db.Decimal(12, 4)
   currency    Currency
-  lastPrice   Decimal? @db.Decimal(12, 4) @map("last_price")
+  lastPrice   Decimal? @map("last_price") @db.Decimal(12, 4)
   lastUpdated DateTime @updatedAt @map("last_updated")
   createdAt   DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, stockCode, market])
   @@index([userId])
@@ -121,4 +117,4 @@ enum TransactionType {
 enum Currency {
   USD
   HKD
-} 
+}
