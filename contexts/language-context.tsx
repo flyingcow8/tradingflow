@@ -235,6 +235,17 @@ const translations = {
     // Cash types
     usdCashFull: "美元现金",
     hkdCashFull: "港币现金",
+    
+    // 持仓操作
+    editPosition: "编辑持仓",
+    deletePosition: "删除持仓",
+    modifyPositionDetails: "修改此持仓的详细信息",
+    quantityAndPriceMustBePositive: "数量和价格必须为正数",
+    updatePositionFailed: "更新持仓失败",
+    deletePositionFailed: "删除持仓失败",
+    deletePositionMessage: "确定要删除这个持仓吗？此操作无法撤销。",
+    deletePositionWarning: "警告：这将永久删除此持仓记录。",
+    totalValue: "总价值",
   },
   en: {
     // Navigation
@@ -458,13 +469,24 @@ const translations = {
     // Cash types
     usdCashFull: "USD Cash",
     hkdCashFull: "HKD Cash",
+    
+    // Position operations
+    editPosition: "Edit Position",
+    deletePosition: "Delete Position",
+    modifyPositionDetails: "Modify position details for this holding",
+    quantityAndPriceMustBePositive: "Quantity and price must be positive",
+    updatePositionFailed: "Failed to update position",
+    deletePositionFailed: "Failed to delete position",
+    deletePositionMessage: "Are you sure you want to delete this position? This action cannot be undone.",
+    deletePositionWarning: "Warning: This will permanently remove this position from your portfolio.",
+    totalValue: "Total Value",
   },
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>("zh")
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("language") as Language

@@ -13,8 +13,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "TradingFlow - Investment Assistant",
-  description: "Modern Stock Trading Dashboard",
+  title: "TradingFlow - 投资报表网站",
+  description: "现代化的股票交易仪表板",
     generator: 'v0.dev'
 }
 
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body className={`${inter.variable} font-sans`}>
         <Providers>
         <LanguageProvider>{children}</LanguageProvider>

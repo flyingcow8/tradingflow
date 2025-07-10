@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
-import { TrendingUp, TrendingDown, DollarSign, PieChartIcon, Wallet, Plus, RefreshCw } from "lucide-react"
+import { TrendingUp, TrendingDown, DollarSign, PieChartIcon, Wallet, Plus, RefreshCw, Edit, Trash2 } from "lucide-react"
 import { NewPositionDialog } from "@/components/new-position-dialog"
+import { EditPositionDialog } from "@/components/edit-position-dialog"
+import { DeletePositionDialog } from "@/components/delete-position-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { convertToUSD, formatCurrencyInUSD, formatCurrencyOriginal } from "@/lib/currency"
 import { PriceStatusIndicator } from "@/components/price-status-indicator"
@@ -104,6 +106,14 @@ export function PortfolioContent() {
   const [isNewPositionDialogOpen, setIsNewPositionDialogOpen] = useState(false)
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false)
   const [lastPriceUpdate, setLastPriceUpdate] = useState<Date | null>(null)
+  
+  // 编辑持仓相关状态
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingPosition, setEditingPosition] = useState<PortfolioItem | null>(null)
+  
+  // 删除持仓相关状态
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deletingPosition, setDeletingPosition] = useState<PortfolioItem | null>(null)
 
   // 从API获取持仓数据
   useEffect(() => {
@@ -188,6 +198,62 @@ export function PortfolioContent() {
       setIsNewPositionDialogOpen(false)
     } catch (error) {
       console.error('Failed to add position:', error)
+    }
+  }
+
+  // 编辑持仓
+  const handleEditPosition = (position: PortfolioItem) => {
+    setEditingPosition(position)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdatePosition = async (positionId: string, data: { stockName: string; quantity: number; averageCost: number }) => {
+    try {
+      const response = await fetch(`/api/positions/${positionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update position')
+      }
+
+      setIsEditDialogOpen(false)
+      setEditingPosition(null)
+      await loadPositions() // 重新加载持仓数据
+    } catch (error) {
+      console.error('Failed to update position:', error)
+      alert(t("updatePositionFailed"))
+    }
+  }
+
+  // 删除持仓
+  const handleDeletePosition = (position: PortfolioItem) => {
+    setDeletingPosition(position)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDeletePosition = async () => {
+    if (deletingPosition) {
+      try {
+        const response = await fetch(`/api/positions/${deletingPosition.id}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to delete position')
+        }
+
+        setIsDeleteDialogOpen(false)
+        setDeletingPosition(null)
+        await loadPositions() // 重新加载持仓数据
+      } catch (error) {
+        console.error('Failed to delete position:', error)
+        alert(t("deletePositionFailed"))
+      }
     }
   }
 
@@ -531,6 +597,7 @@ export function PortfolioContent() {
                         <TableHead className="font-chinese">{t("profit")}</TableHead>
                         <TableHead className="font-chinese">{t("returnRate")}</TableHead>
                         <TableHead className="font-chinese">{t("allocation")}</TableHead>
+                        <TableHead className="font-chinese text-center">{t("actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -602,6 +669,28 @@ export function PortfolioContent() {
                             </span>
                           </TableCell>
                           <TableCell className="font-numbers">{(totalMarketValueUSD > 0 ? ((item.currentValueUSD || 0) / totalMarketValueUSD) * 100 : 0).toFixed(1)}%</TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditPosition(item)}
+                                className="h-8 w-8 p-0"
+                                title={t("editPosition")}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeletePosition(item)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                title={t("deletePosition")}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -621,6 +710,7 @@ export function PortfolioContent() {
                         <TableHead className="font-chinese">{t("currency")}</TableHead>
                         <TableHead className="font-chinese">{t("cashBalance")}</TableHead>
                         <TableHead className="font-chinese">{t("allocation")}</TableHead>
+                        <TableHead className="font-chinese text-center">{t("actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -642,6 +732,28 @@ export function PortfolioContent() {
                           </TableCell>
                           <TableCell className="font-numbers">
                             {(totalMarketValueUSD > 0 ? ((item.currentValueUSD || 0) / totalMarketValueUSD) * 100 : 0).toFixed(1)}%
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditPosition(item)}
+                                className="h-8 w-8 p-0"
+                                title={t("editPosition")}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeletePosition(item)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                title={t("deletePosition")}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -667,6 +779,24 @@ export function PortfolioContent() {
         onOpenChange={setIsNewPositionDialogOpen}
         onSubmit={handleAddPosition}
       />
+
+      {/* Edit Position Dialog */}
+      <EditPositionDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        position={editingPosition}
+        onSubmit={handleUpdatePosition}
+      />
+
+      {/* Delete Position Dialog */}
+      {deletingPosition && (
+        <DeletePositionDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          position={deletingPosition}
+          onConfirm={confirmDeletePosition}
+        />
+      )}
     </div>
   )
 }
